@@ -75,6 +75,11 @@ int main(const int argc, char * argv[]) {
                 instruction++;
             line_has_instruction = 0;
         }
+        else if (token.type == TOK_ERROR)
+        {
+            fprintf(stderr, "Zeile %d: %s\n", token.line, token.text);
+            exit(-1);
+        }
         else
             line_has_instruction = 1;
     }
@@ -100,6 +105,15 @@ int main(const int argc, char * argv[]) {
 
         while (token.type != TOK_EOL && token.type != TOK_EOF)
         {
+            int is_operand = token.type == TOK_IDENT || token.type == TOK_REGISTER
+                          || token.type == TOK_NUMBER || token.type == TOK_LABEL_IDENT;
+
+            if (is_operand && counter == MAX_TOKENS_PER_LINE)
+            {
+                fprintf(stderr, "Zeile %d: Zu viele Operanden (maximal %d Tokens pro Zeile)\n", token.line, MAX_TOKENS_PER_LINE);
+                exit(-1);
+            }
+
             if (token.type == TOK_IDENT || token.type == TOK_REGISTER || token.type == TOK_NUMBER) {
                 token_line[counter] = token;
                 counter++;
@@ -109,11 +123,12 @@ int main(const int argc, char * argv[]) {
                 Label *label = symtab_lookup(symtab, token.text);
                 if (label == NULL)
                 {
-                    fprintf(stderr, "Label %s not found\n", token.text);
+                    fprintf(stderr, "Zeile %d: Label %s not found\n", token.line, token.text);
                     exit(-1);
                 }
                 token_line[counter].type = TOK_NUMBER;
                 token_line[counter].value = label->address;
+                token_line[counter].line = token.line;
                 counter++;
             }
 
