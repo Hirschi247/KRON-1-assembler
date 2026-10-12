@@ -20,12 +20,12 @@ static char *read_file(const char *filename)
         exit(-1);
     }
 
-    // Größe der File ermitteln:
+    // Determine the file size:
     fseek(source, 0, SEEK_END);
     long size = ftell(source);
     fseek(source, 0, SEEK_SET);
 
-    // Speicher für den Dateiinhalt (Source) allokieren:
+    // Allocate a buffer for the file contents:
     char *buffer = malloc(size + 1);
     if (buffer == NULL)
     {
@@ -46,7 +46,6 @@ int main(const int argc, char * argv[]) {
         fprintf(stderr, "Usage: %s <input-file> <output-file>\n", argv[0]);
         return 1;
     }
-    char *bla = argv[0];
     input_filename = argv[1];
     output_filename = argv[2];
 
@@ -58,14 +57,14 @@ int main(const int argc, char * argv[]) {
     scanner_init(&scanner, read_file(input_filename));
 
     int instruction = 0;
-    int line_has_instruction = 0; // Leerzeilen, reine Kommentar- und Label-Zeilen zählen nicht
+    int line_has_instruction = 0; // empty, comment-only and label-only lines don't count
 
     while ((token = scanner_next(&scanner)).type != TOK_EOF)
     {
         if (token.type == TOK_LABEL)
         {
             Label *label = malloc(sizeof(Label));
-            label->name = strdup(token.text); // token.text wird beim nächsten scanner_next überschrieben
+            label->name = strdup(token.text); // token.text is overwritten by the next scanner_next call
             label->address = instruction;
             symtab_insert(symtab, label);
         }
@@ -77,7 +76,7 @@ int main(const int argc, char * argv[]) {
         }
         else if (token.type == TOK_ERROR)
         {
-            fprintf(stderr, "Zeile %d: %s\n", token.line, token.text);
+            fprintf(stderr, "Line %d: %s\n", token.line, token.text);
             exit(-1);
         }
         else
@@ -98,7 +97,7 @@ int main(const int argc, char * argv[]) {
 
     while ((token = scanner_next(&scanner)).type != TOK_EOF) {
         int counter = 0;
-        memset(token_line, 0, sizeof(*token_line) * MAX_TOKENS_PER_LINE); // keine Operanden aus der Vorzeile übernehmen
+        memset(token_line, 0, sizeof(*token_line) * MAX_TOKENS_PER_LINE); // don't carry over operands from the previous line
 
         if (token.type == TOK_LABEL)
             token = scanner_next(&scanner);
@@ -110,7 +109,7 @@ int main(const int argc, char * argv[]) {
 
             if (is_operand && counter == MAX_TOKENS_PER_LINE)
             {
-                fprintf(stderr, "Zeile %d: Zu viele Operanden (maximal %d Tokens pro Zeile)\n", token.line, MAX_TOKENS_PER_LINE);
+                fprintf(stderr, "Line %d: Too many operands (at most %d tokens per line)\n", token.line, MAX_TOKENS_PER_LINE);
                 exit(-1);
             }
 
@@ -123,7 +122,7 @@ int main(const int argc, char * argv[]) {
                 Label *label = symtab_lookup(symtab, token.text);
                 if (label == NULL)
                 {
-                    fprintf(stderr, "Zeile %d: Label %s not found\n", token.line, token.text);
+                    fprintf(stderr, "Line %d: Label %s not found\n", token.line, token.text);
                     exit(-1);
                 }
                 token_line[counter].type = TOK_NUMBER;
@@ -135,7 +134,7 @@ int main(const int argc, char * argv[]) {
             token = scanner_next(&scanner);
         }
 
-        if (counter == 0) // Leerzeile, reine Kommentar- oder Label-Zeile
+        if (counter == 0) // empty, comment-only or label-only line
             continue;
 
         uint64_t *instruction_binary = encode(token_line);
