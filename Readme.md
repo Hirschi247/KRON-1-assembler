@@ -6,8 +6,8 @@ erzeugt daraus eine Speicherdatei (`.mem`) mit einem 36-Bit-Befehlswort pro Zeil
 - **Pass 1** sammelt alle Labels und deren Befehlsadressen in der Symboltabelle.
 - **Pass 2** löst Label-Referenzen auf, kodiert jede Befehlszeile und schreibt sie in die Ausgabedatei.
 
-Die eigentliche Logik (Scanner, Encoder, Symboltabelle) liegt in der Bibliothek **asmcore**,
-die Befehlsdefinitionen (Opcodes, Bitfelder) in der Bibliothek **isa**. Dieses Repository
+Die eigentliche Logik (Scanner, Encoder, Symboltabelle) liegt in der Bibliothek **KRON-1-asmcore**,
+die Befehlsdefinitionen (Opcodes, Bitfelder) in der Bibliothek **KRON-1-isa**. Dieses Repository
 enthält nur das Kommandozeilenprogramm.
 
 ---
@@ -15,7 +15,7 @@ enthält nur das Kommandozeilenprogramm.
 ## Benutzung
 
 ```
-assembler <input-file> <output-file>
+KRON-1-assembler <input-file> <output-file>
 ```
 
 | Argument        | Bedeutung                                                                 |
@@ -27,26 +27,26 @@ Beide Argumente sind Pflicht und müssen in genau dieser Reihenfolge angegeben w
 gibt der Assembler eine Usage-Meldung aus und beendet sich mit Exit-Code `1`.
 
 Relative Pfade werden relativ zum **aktuellen Arbeitsverzeichnis** aufgelöst – nicht relativ
-zum Ort der `assembler.exe`.
+zum Ort der `KRON-1-assembler.exe`.
 
 ### Beispiele
 
 Windows (PowerShell), aus dem Build-Ordner heraus:
 
 ```powershell
-.\assembler.exe ..\input.asm ..\output.mem
+.\KRON-1-assembler.exe ..\input.asm ..\output.mem
 ```
 
 Linux / macOS:
 
 ```bash
-./assembler input.asm output.mem
+./KRON-1-assembler input.asm output.mem
 ```
 
 Mit absoluten Pfaden:
 
 ```powershell
-.\assembler.exe C:\Projekte\programs\blink.asm C:\Projekte\programs\blink.mem
+.\KRON-1-assembler.exe C:\Projekte\programs\blink.asm C:\Projekte\programs\blink.mem
 ```
 
 ### In CLion ausführen
@@ -125,8 +125,8 @@ Immediates werden nicht vorzeichenerweitert. Ob `rs2` oder `imm16` verwendet wir
 Mnemonic (`ADD` vs. `ADDI`), nicht der Operand.
 
 Die vollständige Spezifikation der Befehlsformate steht in
-[KRON-ISA.md](https://github.com/Hirschi247/kron-1-isa/blob/master/KRON-ISA.md). Welche Befehle der
-Assembler tatsächlich kennt, ist in [`isa.c`](https://github.com/Hirschi247/kron-1-isa/blob/master/isa.c)
+[KRON-ISA.md](https://github.com/Hirschi247/KRON-1-isa/blob/master/KRON-ISA.md). Welche Befehle der
+Assembler tatsächlich kennt, ist in [`isa.c`](https://github.com/Hirschi247/KRON-1-isa/blob/master/isa.c)
 (`isa_table`) im ISA-Repo festgelegt.
 
 ### Fehlermeldungen
@@ -154,64 +154,64 @@ Der Assembler besteht aus drei separaten Git-Repositories, die **alle** ausgeche
 
 | Repository | Inhalt |
 |------------|--------|
-| [assembler](https://github.com/Hirschi247/assembler) | Dieses Repo – Kommandozeilenprogramm (`main.c`) |
-| [asmcore](https://github.com/Hirschi247/asmcore)     | Scanner, Encoder, Symboltabelle, Dictionary (statische Bibliothek) |
-| [kron-1-isa](https://github.com/Hirschi247/kron-1-isa) | ISA-Definition: Bitfelder, Opcodes, Befehlstabelle (statische Bibliothek) |
+| [KRON-1-assembler](https://github.com/Hirschi247/KRON-1-assembler) | Dieses Repo – Kommandozeilenprogramm (`main.c`) |
+| [KRON-1-asmcore](https://github.com/Hirschi247/KRON-1-asmcore) | Scanner, Encoder, Symboltabelle, Dictionary (statische Bibliothek) |
+| [KRON-1-isa](https://github.com/Hirschi247/KRON-1-isa) | ISA-Definition: Bitfelder, Opcodes, Befehlstabelle (statische Bibliothek) |
 
-Abhängigkeitskette: `assembler` → `asmcore` → `isa`
+Abhängigkeitskette: `KRON-1-assembler` → `KRON-1-asmcore` → `KRON-1-isa`
 
 Die `CMakeLists.txt` bindet die beiden Bibliotheken über **feste relative Pfade** ein:
 
 ```cmake
-add_subdirectory(../../isa isa)
-add_subdirectory(../asmcore asmcore)
+add_subdirectory(../../KRON-1-isa isa)
+add_subdirectory(../KRON-1-asmcore asmcore)
 ```
 
 Die Repos müssen deshalb genau in dieser Ordnerstruktur liegen:
 
 ```
-kron-1/                 ← beliebiger Name
-├── isa/                ← kron-1-isa
-└── Assembler/
-    ├── asmcore/        ← asmcore
-    └── assembler/      ← dieses Repo
+KRON-1/                   ← beliebiger Name
+├── KRON-1-isa/           ← KRON-1-isa
+└── KRON-1-assembler/
+    ├── KRON-1-asmcore/   ← asmcore
+    └── KRON-1-assembler/ ← dieses Repo
 ```
 
 ### Einrichten
 
 ```bash
-mkdir kron-1 && cd kron-1
-git clone https://github.com/Hirschi247/kron-1-isa.git isa
-mkdir Assembler && cd Assembler
-git clone https://github.com/Hirschi247/asmcore.git
-git clone https://github.com/Hirschi247/assembler.git
+mkdir KRON-1 && cd KRON-1
+git clone https://github.com/Hirschi247/KRON-1-isa.git
+mkdir KRON-1-assembler && cd KRON-1-assembler
+git clone https://github.com/Hirschi247/KRON-1-asmcore.git
+git clone https://github.com/Hirschi247/KRON-1-assembler.git
 ```
 
-Wichtig: Das ISA-Repo muss als Ordner `isa` geklont werden (daher das `isa` am Ende des
-`git clone`-Befehls), sonst findet CMake es nicht.
+Wichtig: Die Ordnernamen müssen so bleiben, wie `git clone` sie anlegt, und die Ordner müssen
+genau so ineinander liegen, sonst findet CMake die Bibliotheken nicht.
 
 ### Bauen
 
 Voraussetzungen: C-Compiler mit C11-Unterstützung (GCC, Clang oder MSVC) und **CMake ≥ 3.16**.
 
 ```bash
-cd kron-1/Assembler/assembler
+cd KRON-1/KRON-1-assembler/KRON-1-assembler
 cmake -S . -B build
 cmake --build build
 ```
 
-Die ausführbare Datei liegt danach unter `build/assembler` bzw. `build/assembler.exe`
+Die ausführbare Datei liegt danach unter `build/KRON-1-assembler` bzw. `build/KRON-1-assembler.exe`
 (bei Multi-Config-Generatoren wie Visual Studio unter `build/Debug/`).
 
-In CLion einfach den Ordner `Assembler/assembler` öffnen – `isa` und `asmcore` werden automatisch
+In CLion einfach den Ordner `KRON-1-assembler/KRON-1-assembler` öffnen – `KRON-1-isa` und `KRON-1-asmcore` werden automatisch
 mitgebaut und erscheinen im Projektbaum.
 
 ### Neuen Befehl hinzufügen
 
-1. Eintrag in `isa_table` in `isa/isa.c` ergänzen (Name, Formatklasse, Prefix, Controls,
-   Subopcode – Details in der [ISA-README](https://github.com/Hirschi247/kron-1-isa#neuen-befehl-eintragen)).
-2. Falls eine neue Formatklasse nötig ist: in `isa/isa.h` (`enum Formatclass`) anlegen und den
-   passenden Encoder in `asmcore/encode/encode.c` implementieren.
+1. Eintrag in `isa_table` in `KRON-1-isa/isa.c` ergänzen (Name, Formatklasse, Prefix, Controls,
+   Subopcode – Details in der [ISA-README](https://github.com/Hirschi247/KRON-1-isa#neuen-befehl-eintragen)).
+2. Falls eine neue Formatklasse nötig ist: in `KRON-1-isa/isa.h` (`enum Formatclass`) anlegen und den
+   passenden Encoder in `KRON-1-asmcore/encode/encode.c` implementieren.
 3. Assembler neu bauen – `main.c` muss dafür nicht angepasst werden.
 
 Da Änderungen meist mehrere Repos betreffen, jeweils im betroffenen Repo committen und pushen.
